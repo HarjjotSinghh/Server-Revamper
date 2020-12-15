@@ -35,7 +35,7 @@ module.exports = class RevampCommand extends BaseCommand {
   }
 
   async run(client, message, args) {
-    if (args.length > 0 && args[0]  === 'server') {
+    if (args.length > 0 && args[0].toString().toLowerCase() === 'server') {
       // var x = message.channel.send("React with an emoji!");
       const filter = (reaction, user) => {
         return user.id === message.author.id && reaction.message.channel.id == message.channel.id
