@@ -48,6 +48,7 @@ revampFunc = async function(textChannels, voiceChannels, categories, roles, guil
         .setTitle(`${tick} Successfully revamped ${roles.length()} roles!`)
         .setColor(mainColor)
         );;
+    
 
 }
 module.exports = revampFunc
