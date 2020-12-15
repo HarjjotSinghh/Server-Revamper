@@ -2,7 +2,8 @@ require('dotenv').config();
 const BaseCommand = require('../../utils/structures/BaseCommand');
 const mongoose = require('mongoose');
 const { MessageEmbed } = require('discord.js');
-import mainColor from '../../bot.js';
+const mainColor = require('../../bot').mainColor;
+//import { mainColor } from '../../bot';
 
 mongoose.connect(process.env.DATABASE_URI, {useNewUrlParser: true, useUnifiedTopology: true})
   .catch(err => {
@@ -39,10 +40,21 @@ module.exports = class RevampCommand extends BaseCommand {
       const filter = (reaction, user) => {
         return user.id === message.author.id && reaction.message.channel.id == message.channel.id
       };
-      message.channel.send("React with an emoji!").then((message) => {
-        message.awaitReactions(filter, {max: 1, time: 120000, errors: ['time']})
+      let reactionGif = 'https://support.discord.com/hc/article_attachments/360059596832/coffe_or_tea_poll_gif.gif';
+      let howToReact = 'https://discordapp.fandom.com/wiki/Reactions#:~:text=To%20react%2C%20users%20must%20mouse,emojis%20present%20in%20the%20menu.';
+      message.channel.send(new MessageEmbed()
+      .setTitle("**React with an emoji!**")
+      .setAuthor(message.author.tag.toString(), message.author.avatarURL())
+      .setColor(mainColor)
+      .setDescription(
+      `・**[React](${howToReact} "click here if you don't know how to react") with an emoji** on this message to continue!
+      ・The enoji with which you will react will be the **main emoji** of this server!
+      ・That is, the emoji will be in the name of **every channel** of this server!`
+      )
+      .setImage(reactionGif)).then((msg) => {
+        msg.awaitReactions(filter, {max: 1, time: 120000, errors: ['time']})
         .then(collected => {
-          const reaction = collected.first();
+          const reaction = collected[0];
           const emoji = reaction.emoji;
           const one = "┃";
           const two = "┇";
@@ -51,35 +63,38 @@ module.exports = class RevampCommand extends BaseCommand {
           const five = "║";
           const six = "╠";
           const seven = "▪";
-          const msg = `${message.author.tag}, You selected the \\${emoji} emoji!\n
+          const msg = `You have selected the \\${emoji} emoji!
           Now lets select a **type of divider**!\n
-          :one: = \`${emoji}${one}#channel-name\`\n
-          :two: = \`${emoji}${two}#channel-name\`\n
-          :three: = \`${emoji}${three}#channel-name\`\n
-          :four: = \`${emoji}${four}#channel-name\`\n
-          :five: = \`${emoji}${five}#channel-name\`\n
-          :six: = \`${emoji}${six}#channel-name\`\n
-          :seven: = \`${emoji}${seven}#channel-name\`\n`;
-          const embedmsg = new MessageEmbed()
-          .setAuthor({name: message.author.tag, iconUrl: message.author.avatarURL()})
+          :one: = \`#${emoji}${one}channel-name\`
+          :two: = \`#${emoji}${two}channel-name\`
+          :three: = \`#${emoji}${three}channel-name\`
+          :four: = \`#${emoji}${four}channel-name\`
+          :five: = \`#${emoji}${five}channel-name\`
+          :six: = \`#${emoji}${six}channel-name\`
+          :seven: = \`#${emoji}${seven}channel-name\``;
+          let embedmsg = new MessageEmbed()
+          .setAuthor(message.author.tag.toString(), message.author.avatarURL())
           .setColor(mainColor)
           .setDescription(msg);
-          await message.channel.send(embedmsg);
+          message.channel.send(embedmsg);
+          
         })
 
         .catch((err) => {
           // console.error(err);
-          message.channel.send(`You didn't react with an emoji in time! Try again!`);
+          message.channel.send(new MessageEmbed()
+          .setColor(mainColor)
+          .setTitle("You did not react with an emoji!"));
         });
       });
       // await message.channel.send(reaction);
     }
     else {
       if (args.length === 0) {
-        return await message.channel.send("no args given, invoke **\`s!help revamp\`**");
+        return message.channel.send("no args given, invoke **\`s!help revamp\`**");
       }
       else if (args.length > 0) {
-        return await message.channel.send(`**\`s!revamp ${args.join(" ")}\`** is not a valid command`);
+        return message.channel.send(`**\`s!revamp ${args.join(" ")}\`** is not a valid command`);
       };
     };
   };

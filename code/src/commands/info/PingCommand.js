@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const BaseCommand = require('../../utils/structures/BaseCommand');
-import mainColor from '../../bot.js';
+const mainColor = require('../../bot').mainColor;
 
 module.exports = class PingCommand extends BaseCommand {
   constructor() {
@@ -11,13 +11,13 @@ module.exports = class PingCommand extends BaseCommand {
       .setTitle(":ping_pong: Pong!")
       .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true}))
       .setDescription(`**Ping**: ${Math.round(client.ws.ping)}ms`)
-      .setColor([242, 31, 67]);
+      .setColor(mainColor);
     let y = await message.channel.send(embed);
     const embed2 = new MessageEmbed()
     .setTitle(":ping_pong: Pong!")
     .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true}))
     .setDescription(`**API Latency**: ${Math.round(client.ws.ping)}ms\n**Response Time**: ${Math.round(Date.now() - message.createdAt)}ms`)
-    .setColor([242, 31, 67]);
+    .setColor(mainColor);
     await y.edit("", {embed: embed2});
   };
 };

@@ -2,7 +2,9 @@ require('dotenv').config();
 const { Client } = require('discord.js');
 const { registerCommands, registerEvents } = require('./utils/registry');
 const client = new Client();
-const mainColor = [242, 31, 67];
+module.exports = {
+  mainColor: 0xf21f43
+};
 
 (async () => {
   client.commands = new Map();
