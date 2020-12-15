@@ -49,12 +49,13 @@ module.exports = class RevampCommand extends BaseCommand {
       .setDescription(
       `・**[React](${howToReact} "click here if you don't know how to react") with an emoji** on this message to continue!
       ・The enoji with which you will react will be the **main emoji** of this server!
-      ・That is, the emoji will be in the name of **every channel** of this server!`
+      ・That is, the emoji will be in the name of **every channel** of this server!
+      ・*You have 3 minutes to react to this message.*`
       )
       .setImage(reactionGif)).then((msg) => {
-        msg.awaitReactions(filter, {max: 1, time: 120000, errors: ['time']})
+        msg.awaitReactions(filter, {max: 1, time: 300, errors: ['time']})
         .then(collected => {
-          const reaction = collected[0];
+          const reaction = collected.first();
           const emoji = reaction.emoji;
           const one = "┃";
           const two = "┇";
@@ -62,26 +63,30 @@ module.exports = class RevampCommand extends BaseCommand {
           const four = "╏";
           const five = "║";
           const six = "╠";
-          const seven = "▪";
-          const msg = `You have selected the \\${emoji} emoji!
-          Now lets select a **type of divider**!\n
-          :one: = \`#${emoji}${one}channel-name\`
-          :two: = \`#${emoji}${two}channel-name\`
-          :three: = \`#${emoji}${three}channel-name\`
-          :four: = \`#${emoji}${four}channel-name\`
-          :five: = \`#${emoji}${five}channel-name\`
-          :six: = \`#${emoji}${six}channel-name\`
-          :seven: = \`#${emoji}${seven}channel-name\``;
+          const seven = "・";
+          const msg = `・You have selected the \\${emoji} emoji!
+          ・Now lets select a **type of divider**!\n
+          ・:one: = \`#${emoji}${one}channel-name\`
+          ・:two: = \`#${emoji}${two}channel-name\`
+          ・:three: = \`#${emoji}${three}channel-name\`
+          ・:four: = \`#${emoji}${four}channel-name\`
+          ・:five: = \`#${emoji}${five}channel-name\`
+          ・:six: = \`#${emoji}${six}channel-name\`
+          ・:seven: = \`#${emoji}${seven}channel-name\`
+          ・*You have 3 minutes to react to this message.*`;
           let embedmsg = new MessageEmbed()
           .setAuthor(message.author.tag.toString(), message.author.avatarURL())
           .setColor(mainColor)
           .setDescription(msg);
           message.channel.send(embedmsg);
-          
+          const filter2 = m => m.content in ['1', '2', '3', '4', '5', '6', '7'] && m.author.id == message.author.id;
+          message.channel.awaitMessages(filter2, {max: 1, time: 500, errors: ['time']})
+          .then(collected => {
+            
+          })
         })
-
         .catch((err) => {
-          // console.error(err);
+          console.error(err);
           message.channel.send(new MessageEmbed()
           .setColor(mainColor)
           .setTitle("You did not react with an emoji!"));

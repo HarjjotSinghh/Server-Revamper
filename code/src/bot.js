@@ -3,6 +3,8 @@ const { Client } = require('discord.js');
 const { registerCommands, registerEvents } = require('./utils/registry');
 const client = new Client();
 module.exports = {
+  tick: "<a:trixztickgreen:788278635844468736>",
+  cross: "<a:trixztickred:788278665627566081>",
   mainColor: 0xf21f43
 };
 
