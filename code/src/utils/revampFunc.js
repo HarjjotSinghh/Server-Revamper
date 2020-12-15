@@ -7,10 +7,10 @@ async function sleep (milliseconds) {
 
 revampFunc = async function(textChannels, voiceChannels, categories, roles, guild, emoji, divider, channel) {
     // await channel.send(new )
-    textChannels.forEach(textChannel => {
-        setTimeout(function() {
+    textChannels.forEach(async textChannel => {
+        setTimeout(async function() {
             await textChannel.edit({name: `${emoji}${divider}` + textChannel.name})
-        }, 1200)
+        }, 1000)
         // await sleep()
     });
     await channel.send(
@@ -18,37 +18,44 @@ revampFunc = async function(textChannels, voiceChannels, categories, roles, guil
         .setTitle(`${tick} Successfully revamped ${textChannels.length()} text channels!`)
         .setColor(mainColor)
         );
-    voiceChannels.forEach(voiceChannel => {
-        setTimeout(function() {
+    voiceChannels.forEach(async voiceChannel => {
+        setTimeout(async function() {
             await voiceChannel.edit({name: `${emoji}${divider}` + voiceChannel.name})
-        }, 1200)
+        }, 1000)
     });
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${voiceChannels.length()} voice channels!`)
         .setColor(mainColor)
         );
-    categories.forEach(category => {
-        setTimeout(function() {
+    categories.forEach(async category => {
+        setTimeout(async function() {
             await category.edit({name: `${emoji}${divider}` + category.name})
-        }, 1200);
+        }, 1000);
     });;
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${categories.length()} categories!`)
         .setColor(mainColor)
         );;
-    roles.forEach(role => {
-        setTimeout(function() {
+    roles.forEach(async role => {
+        setTimeout(async function() {
             await role.edit({name: emoji + divider + role.name})
-        }, 1200);
+        }, 1000);
     });;
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${roles.length()} roles!`)
         .setColor(mainColor)
         );;
-    
-
+    await guild.edit({name: emoji + divider + guild.name})
+    await channel.send(
+        new MessageEmbed()
+        .setTitle(`${tick} Successfully revamped the full server!`)
+        .setDescription(`If you anytime want to revert these changes made, you can use the **\`s!revamp reset\`** command!`)
+        .addField(name="Emoji:", name='\\' + emoji, true)
+        .addField(name="Divider:", value=divider, true)
+        .setColor(mainColor)
+    );;
 }
 module.exports = revampFunc

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { MessageEmbed } = require('discord.js');
 const mainColor = require('../../bot').mainColor;
 const Revamp = require('../../models/revampSchema.js');
+const { revampFunc } = require('../../utils/revampFunc.js');
 //import { mainColor } from '../../bot';
 
 
@@ -116,7 +117,32 @@ module.exports = class RevampCommand extends BaseCommand {
                   divider = seven;
                   break;
               };
-              message.channel.send(`You selected the ${divider} divider!`)
+              // message.channel.send(`You selected the ${divider} divider!`)
+              const roles = message.guild.roles.cache;
+              
+              const text_channels = message.guild.channels.cache.filter(ch => {
+                ch.deleted == false && ch.type === 'text'
+              });
+              // console.log(text_channels);
+              const voice_channels = message.guild.channels.cache.filter(ch => {
+                ch.deleted == false && ch.type === 'voice'
+              });
+              const categories = message.guild.channels.cache.filter(ch => {
+                ch.deleted == false && ch.type === 'category'
+              });
+              const e = new MessageEmbed()
+              .setAuthor(message.author.tag.toString(), message.author.avatarURL())
+              .setColor(mainColor)
+              .setTitle("**Starting Revamp!**")
+              .setDescription(`Starting the server revamp with the following settings!`)
+              .addField("Emoji:", '\\' + emoji, true)
+              .addField("Divider:", divider, true)
+              .addField("To be revamped:",
+              `**${roles.size - 1}** roles
+              **${text_channels.size}** text channels
+              **${voice_channels.size}** voice channels
+              **${categories.size}** categories`);
+              message.channel.send(e);
             })
             .catch(err => console.error(err));
           });
