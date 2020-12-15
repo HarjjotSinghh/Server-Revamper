@@ -1,22 +1,49 @@
 require('dotenv').config();
-import BaseCommand from '../../utils/structures/BaseCommand';
-import mongoose from 'mongoose';
+const BaseCommand = require('../../utils/structures/BaseCommand');
+const mongoose = require('mongoose');
+const { MessageEmbed } = require('discord.js');
+import mainColor from '../../bot.js';
 
-export default class RevampCommand extends BaseCommand {
+mongoose.connect(process.env.DATABASE_URI, {useNewUrlParser: true, useUnifiedTopology: true})
+  .catch(err => {
+    handleError(err);
+  });
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error: '));
+db.once('open', function() {
+  console.log("Connected to the dataabase!");
+});
+
+const RevampScheme = new mongoose.Schema(
+  {
+    guild_id: String, // ID of the guild
+    revamped_at: {type: Date, default: Date.now()}, // Revamed at; defaults to now
+    revamped_by: String, // ID of the command invoker
+    emoji: String, // Emoji used to revamp the server
+    divider: String, // Divider used to revamp the server
+    total_text_channels: Number, // total # of text channels revamped
+    total_voice_channels: Number, // total # of voice channels revamped
+    total_categories: Number, // total # of categories revamped
+  }
+);
+
+module.exports = class RevampCommand extends BaseCommand {
   constructor() {
     super('revamp', 'revamp', []);
   }
 
   async run(client, message, args) {
     if (args.length > 0 && args[0]  === 'server') {
-      var x = message.channel.send("React with an emoji!");
+      // var x = message.channel.send("React with an emoji!");
       const filter = (reaction, user) => {
-        return user.id === message.author.id // && reaction.message.id === x.id
+        return user.id === message.author.id && reaction.message.channel.id == message.channel.id
       };
       message.channel.send("React with an emoji!").then((message) => {
         message.awaitReactions(filter, {max: 1, time: 120000, errors: ['time']})
         .then(collected => {
           const reaction = collected.first();
+          const emoji = reaction.emoji;
           const one = "┃";
           const two = "┇";
           const three = "┝";
@@ -24,18 +51,22 @@ export default class RevampCommand extends BaseCommand {
           const five = "║";
           const six = "╠";
           const seven = "▪";
-          message.channel.send(`You selected the \\${reaction.emoji} Emoji!\nNow lets select a type of divider!`);
-          const msg = `**${message.author.tag}** Please choose one of the following dividers for the channel names.\n`/
-                      `:one: - ${reaction.emoji.name}${one}#channel-name\n`/
-                      ":two: - `${reaction.emoji.name}${two}#channel-name`\n"/
-                      ":three: - `${reaction.emoji.name}${three}#channel-name`\n"/
-                      ":four: - `${reaction.emoji.name}${four}#channel-name`\n"/
-                      ":five: - `${reaction.emoji.name}${five}#channel-name`\n"/
-                      ":six: - `${reaction.emoji.name}${six}#channel-name`\n"/
-                      ":seven: - `${reaction.emoji.name}${seven}`\n\n"/
-                      "Please reply with the number of divider you choose below :point_down_tone3:";
-          message.channel.send(`You selected the \\${reaction.emoji.name} Emoji!\nNow lets select a type of divider!`);
+          const msg = `${message.author.tag}, You selected the \\${emoji} emoji!\n
+          Now lets select a **type of divider**!\n
+          :one: = \`${emoji}${one}#channel-name\`\n
+          :two: = \`${emoji}${two}#channel-name\`\n
+          :three: = \`${emoji}${three}#channel-name\`\n
+          :four: = \`${emoji}${four}#channel-name\`\n
+          :five: = \`${emoji}${five}#channel-name\`\n
+          :six: = \`${emoji}${six}#channel-name\`\n
+          :seven: = \`${emoji}${seven}#channel-name\`\n`;
+          const embedmsg = new MessageEmbed()
+          .setAuthor({name: message.author.tag, iconUrl: message.author.avatarURL()})
+          .setColor(mainColor)
+          .setDescription(msg);
+          await message.channel.send(embedmsg);
         })
+
         .catch((err) => {
           // console.error(err);
           message.channel.send(`You didn't react with an emoji in time! Try again!`);

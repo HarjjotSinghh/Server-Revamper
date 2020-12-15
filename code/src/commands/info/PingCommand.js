@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const BaseCommand = require('../../utils/structures/BaseCommand');
+import mainColor from '../../bot.js';
 
 module.exports = class PingCommand extends BaseCommand {
   constructor() {
