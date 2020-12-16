@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { MessageEmbed } = require('discord.js');
 const mainColor = require('../../bot').mainColor;
 const Revamp = require('../../models/revampSchema.js');
-const { revampFunc } = require('../../utils/revampFunc.js');
+const revampFunc = require('../../utils/revampFunc.js');
 //import { mainColor } from '../../bot';
 
 
@@ -34,7 +34,7 @@ module.exports = class RevampCommand extends BaseCommand {
       let reactionGif = 'https://support.discord.com/hc/article_attachments/360059596832/coffe_or_tea_poll_gif.gif';
       let howToReact = 'https://discordapp.fandom.com/wiki/Reactions#:~:text=To%20react%2C%20users%20must%20mouse,emojis%20present%20in%20the%20menu.';
       message.channel.send(new MessageEmbed()
-      .setTitle("**React with an emoji!**")
+      .setTitle("**Select an emoji!**")
       .setAuthor(message.author.tag.toString(), message.author.avatarURL())
       .setColor(mainColor)
       .setDescription(
@@ -81,6 +81,7 @@ module.exports = class RevampCommand extends BaseCommand {
           let embedmsg = new MessageEmbed()
           .setAuthor(message.author.tag.toString(), message.author.avatarURL())
           .setColor(mainColor)
+          .setTitle("**Select a divider!**")
           .setDescription(msg);
           message.channel.send(embedmsg)
           .then(async m => {
@@ -92,7 +93,7 @@ module.exports = class RevampCommand extends BaseCommand {
             await m.react('6️⃣');
             await m.react('7️⃣');
             m.awaitReactions(filter, {max: 1, time: 300000, errors: ['time']})
-            .then(col => {
+            .then(async col => {
               const divemoji = col.first();
               switch (divemoji._emoji.name) {
                 case "1️⃣":
@@ -119,23 +120,26 @@ module.exports = class RevampCommand extends BaseCommand {
               };
               // message.channel.send(`You selected the ${divider} divider!`)
               const roles = message.guild.roles.cache;
-              
-              const text_channels = message.guild.channels.cache.filter(ch => {
-                ch.deleted == false && ch.type === 'text'
-              });
+              var text_func = function(x) {
+                return x.type === 'text' && x.deleted === false
+              };
+              var voice_func = function(x) {
+                return x.type === 'voice' && x.deleted === false
+              };
+              var cat_func = function(x) {
+                return x.type === 'category' && x.deleted === false
+              };
+              const text_channels = message.guild.channels.cache.filter(text_func);
               // console.log(text_channels);
-              const voice_channels = message.guild.channels.cache.filter(ch => {
-                ch.deleted == false && ch.type === 'voice'
-              });
-              const categories = message.guild.channels.cache.filter(ch => {
-                ch.deleted == false && ch.type === 'category'
-              });
+              const voice_channels = message.guild.channels.cache.filter(voice_func);
+              const categories = message.guild.channels.cache.filter(cat_func);
+              // console.log(voice_channels);
               const e = new MessageEmbed()
               .setAuthor(message.author.tag.toString(), message.author.avatarURL())
               .setColor(mainColor)
               .setTitle("**Starting Revamp!**")
               .setDescription(`Starting the server revamp with the following settings!`)
-              .addField("Emoji:", '\\' + emoji, true)
+              .addField("Emoji:", '\\' + reaction.emoji.name, true)
               .addField("Divider:", divider, true)
               .addField("To be revamped:",
               `**${roles.size - 1}** roles
@@ -143,8 +147,12 @@ module.exports = class RevampCommand extends BaseCommand {
               **${voice_channels.size}** voice channels
               **${categories.size}** categories`);
               message.channel.send(e);
+              await revampFunc(text_channels, voice_channels, categories, roles, message.guild, reaction.emoji.name, divider, message.channel);
             })
-            .catch(err => console.error(err));
+            .catch((err) => {
+              console.error(err);
+              message.channel.send(err);
+            });
           });
           // const filter2 = m =>
           //   m.content.toString().toLowerCase() in ['1', '2', '3', '4', '5', '6', '7',] && m.author.id == message.author.id;
