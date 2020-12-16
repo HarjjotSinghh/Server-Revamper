@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const RevampScheme = new mongoose.Schema(
+const RevampSchema = new mongoose.Schema(
     {
       guild_id: String, // ID of the guild
       revamped_at: {type: Date, default: Date.now()}, // Revamed at; defaults to now
@@ -9,8 +9,9 @@ const RevampScheme = new mongoose.Schema(
       divider: String, // Divider used to revamp the server
       total_text_channels: Number, // total # of text channels revamped
       total_voice_channels: Number, // total # of voice channels revamped
-      total_categories: Number, // total # of categories revamped
+      total_categories: Number,  // total # of categories revamped
+      total_roles: Number  // total # of roles revamped
     }
   );
 
-module.exports = mongoose.model("Revamp", RevampScheme);
+module.exports = mongoose.model("RevampSchema", RevampSchema);

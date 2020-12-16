@@ -1,66 +1,68 @@
 const { MessageEmbed, RichPresenceAssets } = require('discord.js');
 const {mainColor, cross, tick} = require('../bot.js');
+const wait = require("util").promisify(setTimeout);
 
 async function sleep (milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
-  }
+  };
 
 const revampFunc = async function(textChannels, voiceChannels, categories, roles, guild, emoji, divider, channel) {
     // await channel.send(new )
 
-    textChannels.forEach(async textChannel => {
-        setTimeout(async function() {
-            try {
-                await textChannel.edit({name: `${emoji}${divider}` + textChannel.name})
-            } catch (err) {
-                console.error(err);
-                console.log(typeof(err));
-            };
-        }, 1000)
-        await sleep(1000);
-    });
+    for ( const textChannel of textChannels ) {
+        try {
+            // console.log(textChannel);
+            await textChannel[1].edit({name: `${emoji}${divider}` + textChannel[1].name});
+        } catch (err) {
+            console.error(err);
+            console.log(typeof(err));
+        };
+        await wait(1000);
+    };
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${textChannels.size} text channels!`)
         .setColor(mainColor)
         );
-    await sleep(1000);
-    voiceChannels.forEach(async voiceChannel => {
+    await wait(1000);
+    for (const voiceChannel of voiceChannels) {
         setTimeout(async function() {
-            await voiceChannel.edit({name: `${emoji}${divider}` + voiceChannel.name})
+            await voiceChannel[1].edit({name: `${emoji}${divider}` + voiceChannel[1].name})
         }, 1000)
-        await sleep(1000);
-    });
+        await wait(1000);
+    };
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${voiceChannels.size} voice channels!`)
         .setColor(mainColor)
         );
-        await sleep(1000);
-    categories.forEach(async category => {
+        await wait(1000);
+    for ( const category of categories) {
         setTimeout(async function() {
-            await category.edit({name: `${emoji}${divider}` + category.name})
+            await category[1].edit({name: `${emoji}${divider}` + category[1].name})
         }, 1000);
-        await sleep(1000);
-    });;
+        await wait(1000);
+    };;
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${categories.size} categories!`)
         .setColor(mainColor)
         );;
-    await sleep(1000);
-    roles.forEach(async role => {
+    await wait(1000);
+    for ( const role of roles) {
         setTimeout(async function() {
-            await role.edit({name: emoji + divider + role.name})
+            try {
+            await role[1].edit({name: emoji + divider + role[1].name})
+            } catch (err) {};
         }, 1000);
-        await sleep(1000);
-    });;
+        await wait(1000);
+    };;
     await channel.send(
         new MessageEmbed()
         .setTitle(`${tick} Successfully revamped ${roles.size} roles!`)
         .setColor(mainColor)
         );;
-    await sleep(1000);
+    await wait(1000);
     await guild.edit({name: emoji + divider + guild.name})
     await channel.send(
         new MessageEmbed()

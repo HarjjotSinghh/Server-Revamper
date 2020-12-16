@@ -3,7 +3,9 @@ const BaseCommand = require('../../utils/structures/BaseCommand');
 const mongoose = require('mongoose');
 const { MessageEmbed } = require('discord.js');
 const mainColor = require('../../bot').mainColor;
-const Revamp = require('../../models/revampSchema.js');
+const tick = require('../../bot').tick;
+const cross = require('../../bot').cross;
+const RevampSchema = require('../../models/revampSchema.js');
 const revampFunc = require('../../utils/revampFunc.js');
 //import { mainColor } from '../../bot';
 
@@ -26,8 +28,37 @@ module.exports = class RevampCommand extends BaseCommand {
       // var x = message.channel.send("React with an emoji!");
       mongoose.connect(process.env.DATABASE_URI, {useNewUrlParser: true, useUnifiedTopology: true})
         .catch(err => {
+          message.channel.send(`Ran into an error while connecting to the database.`)
           handleError(err);
+          return
       });
+      const check = RevampSchema.findOne({guild_id: message.guild.id.toString()});
+      check.exec()
+      .then((result) =>{
+        if (result) {
+          let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          return message.channel.send(
+            new MessageEmbed()
+            .setTitle("**Already Revamped!**")
+            .setAuthor(message.author.tag.toString(), message.author.avatarURL())
+            .setColor(mainColor)
+            .setDescription(`This server has already been revamped with these settings.`)
+            .addField("Emoji:", result.emoji, true)
+            .addField("Divider:", result.divider, true)
+            .addField("Revamped at:", result.revamped_at.toLocaleString(undefined,options), true)
+            .addField("Revamped by:", "<@" + result.revamped_by + ">", true)
+            .addField("Extra info:", `Roles revamped: **${result.total_roles}**
+            Text channels revamped: **${result.total_text_channels}**
+            Voice channels revamped: **${result.total_voice_channels}**
+            Categories revamped: **${result.total_categories}**`, true)
+            .addField("More info:",
+            `・If you would like to reset the revamp done, you can use **\`s!revamp reset\`**.
+            ・If you have made any changes to the server after the revamp is done, please use **\`s!revamp reset -f\`**.`, false)
+          );
+        };
+      })
+      .catch(err => console.error(err));
+
       const filter = (reaction, user) => {
         return user.id === message.author.id && reaction.message.channel.id == message.channel.id
       };
@@ -133,6 +164,7 @@ module.exports = class RevampCommand extends BaseCommand {
               // console.log(text_channels);
               const voice_channels = message.guild.channels.cache.filter(voice_func);
               const categories = message.guild.channels.cache.filter(cat_func);
+              const eta = text_channels.size + voice_channels.size + categories.size + roles.size - 1;
               // console.log(voice_channels);
               const e = new MessageEmbed()
               .setAuthor(message.author.tag.toString(), message.author.avatarURL())
@@ -145,9 +177,24 @@ module.exports = class RevampCommand extends BaseCommand {
               `**${roles.size - 1}** roles
               **${text_channels.size}** text channels
               **${voice_channels.size}** voice channels
-              **${categories.size}** categories`);
+              **${categories.size}** categories`)
+              .addField("ETA:", `**${eta} seconds**`);
               message.channel.send(e);
               await revampFunc(text_channels, voice_channels, categories, roles, message.guild, reaction.emoji.name, divider, message.channel);
+              const revampEntry = new RevampSchema({
+                guild_id: message.guild.id.toString(),
+                revamped_at: Date.now(), // Revamed at; defaults to now
+                revamped_by: message.author.id.toString(), // ID of the command invoker
+                emoji: reaction.emoji.name, // Emoji used to revamp the server
+                divider: divider, // Divider used to revamp the server
+                total_text_channels: text_channels.size, // total # of text channels revamped
+                total_voice_channels: voice_channels.size, // total # of voice channels revamped
+                total_categories: categories.size,
+                total_roles: roles.size
+              });
+              revampEntry.save()
+              .then(result => console.log(result))
+              .catch(err => console.error(err));
             })
             .catch((err) => {
               console.error(err);
